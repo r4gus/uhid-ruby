@@ -21,7 +21,9 @@ end
 #Rake::ExtensionTask.new "uhid" do |ext|
 #  ext.lib_dir = "lib/uhid"
 #end
-Rake::ExtensionTask.new("uhid", spec)
+Rake::ExtensionTask.new("uhid", spec) do |ext|
+  ext.lib_dir = "lib/uhid"
+end
 
 # Run tests with `rake spec`
 RSpec::Core::RakeTask.new(:spec)
