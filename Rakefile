@@ -1,4 +1,5 @@
 require "rake/extensiontask"
+require 'rspec/core/rake_task'
 
 spec = Gem::Specification.new do |s|
   s.name        = "uhid"
@@ -21,3 +22,6 @@ end
 #  ext.lib_dir = "lib/uhid"
 #end
 Rake::ExtensionTask.new("uhid", spec)
+
+# Run tests with `rake spec`
+RSpec::Core::RakeTask.new(:spec)

@@ -11,3 +11,7 @@ gem install rake-compiler
 ```
 
 Then run `rake gem` or `rake native gem`.
+
+## Testing
+
+Run tests with `./bin/rspec --format doc`.
