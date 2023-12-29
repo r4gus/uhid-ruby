@@ -2,10 +2,6 @@
 #include "linux/uhid.h"
 #include <fcntl.h>
 
-static VALUE hello_world(VALUE self) {
-    return rb_str_new2("Hello, World!");
-}
-
 static void
 cuhid_write(int fd, const struct uhid_event *ev)
 {
@@ -54,6 +50,9 @@ cuhid_create(VALUE self, VALUE name, VALUE vendor, VALUE product, VALUE data)
     return Qnil;
 }
 
+/*
+ * Close the open uhid device.
+ */
 static VALUE
 cuhid_destroy(VALUE self)
 {
@@ -73,6 +72,15 @@ cuhid_destroy(VALUE self)
     return Qnil;
 }
 
+/*
+ * Write the given data to the host.
+ *
+ * Make sure you send the data in a format, expected
+ * by the host, e.g. in 64 byte chunks.
+ *
+ * @param data [String] the data to be sent to the host.
+ * @returns [Integer] the number of bytes sent.
+ */
 static VALUE
 cuhid_write_data(VALUE self, VALUE data)
 {
@@ -102,6 +110,16 @@ cuhid_write_data(VALUE self, VALUE data)
     return INT2NUM(size);
 }
 
+/*
+ * Read data from the host.
+ *
+ * All returned hashes contain the type key that specifies the type 
+ * of the received packet. Valid types are: START, STOP, OPEN, CLOSE,
+ * OUTPUT. Only OUTPUT Hashes contain a data field that holds the
+ * data received by the host.
+ *
+ * @returns [nil, Hash] a Hash that contains the received data or nil if no data is available.
+ */
 static VALUE
 cuhid_read_data(VALUE self)
 {
@@ -120,34 +138,24 @@ cuhid_read_data(VALUE self)
         return Qnil;
     }
     
-    VALUE t, v, r;
+    VALUE h = rb_hash_new();
     switch (ev.type) {
     case UHID_START:
-        t = rb_str_new_cstr("START");
-        return rb_ary_new_from_values(1, &t);
+        rb_hash_aset(h, rb_str_new_cstr("type"), rb_str_new_cstr("START"));
+        return h;
     case UHID_STOP:
-        t = rb_str_new_cstr("STOP");
-        return rb_ary_new_from_values(1, &t);
+        rb_hash_aset(h, rb_str_new_cstr("type"), rb_str_new_cstr("STOP"));
+        return h;
     case UHID_OPEN:
-        t = rb_str_new_cstr("OPEN");
-        return rb_ary_new_from_values(1, &t);
+        rb_hash_aset(h, rb_str_new_cstr("type"), rb_str_new_cstr("OPEN"));
+        return h;
     case UHID_CLOSE:
-        t = rb_str_new_cstr("CLOSE");
-        return rb_ary_new_from_values(1, &t);
+        rb_hash_aset(h, rb_str_new_cstr("type"), rb_str_new_cstr("CLOSE"));
+        return h;
     case UHID_OUTPUT:
-        t = rb_str_new_cstr("OUTPUT");
-        v = rb_str_new((const char *) ev.u.output.data, ev.u.output.size);
-        switch (ev.u.output.rtype) {
-        case UHID_FEATURE_REPORT:
-            r = rb_str_new_cstr("FEATURE");
-            break;
-        case UHID_OUTPUT_REPORT:
-            r = rb_str_new_cstr("OUTPUT");
-            break;
-        default:
-            r = rb_str_new_cstr("INPUT");
-        }
-        return rb_ary_new_from_args(2, t, v);
+        rb_hash_aset(h, rb_str_new_cstr("type"), rb_str_new_cstr("OUTPUT"));
+        rb_hash_aset(h, rb_str_new_cstr("data"), rb_str_new((const char *) ev.u.output.data, ev.u.output.size));
+        return h;
     default:
         return Qnil;
     }
@@ -155,9 +163,8 @@ cuhid_read_data(VALUE self)
 
 void Init_uhid() {
     VALUE cUhid  = rb_const_get(rb_cObject, rb_intern("Uhid")); 
-    rb_define_method(cUhid, "hello_world", hello_world, 0);
-    rb_define_method(cUhid, "create", cuhid_create, 4);
-    rb_define_method(cUhid, "destroy", cuhid_destroy, 0);
-    rb_define_method(cUhid, "write_data", cuhid_write_data, 1);
-    rb_define_method(cUhid, "read_data", cuhid_read_data, 0);
+    rb_define_private_method(cUhid, "create", cuhid_create, 4);
+    rb_define_private_method(cUhid, "destroy", cuhid_destroy, 0);
+    rb_define_method(cUhid, "write", cuhid_write_data, 1);
+    rb_define_method(cUhid, "read", cuhid_read_data, 0);
 }

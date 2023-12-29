@@ -10,7 +10,20 @@ To build from source you need Ruby, and rake.
 gem install rake-compiler
 ```
 
-Then run `rake gem` or `rake native gem`.
+Then run one of the following commands:
+* `rake compile` - this compiles the C extension and places the `uhid.so` into `lib/uhid/`.
+* `gem build` - build a gem
+* `rake native gem` - build a native gem using rake
+
+## Docs
+
+To build the documentation you need Yard.
+
+```bash
+gem install yard
+```
+
+Then run `yard doc`.
 
 ## Testing
 
