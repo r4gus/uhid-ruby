@@ -15,6 +15,14 @@ Then run one of the following commands:
 * `gem build` - build a gem
 * `rake native gem` - build a native gem using rake
 
+### Build gem
+
+```
+rake compile
+gem build uhid.gemspec
+gem push uhid-x.y.z.gem
+```
+
 ## Docs
 
 To build the documentation you need Yard.

@@ -5,8 +5,6 @@
 #
 # @author David P. Sugar (r4gus)
 class Uhid
-  VERSION = "0.1.0"
-  
   # FIDO2/U2F USB report descriptor
   RD_FIDO = "\x06\xd0\xf1\x09\x01\xa1\x01\x09"\
             "\x20\x15\x00\x26\xff\x00\x75\x08"\
